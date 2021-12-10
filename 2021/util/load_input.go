@@ -3,7 +3,6 @@ package util
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 	"strconv"
@@ -11,12 +10,14 @@ import (
 
 func LoadInput() []string {
 	if len(os.Args) < 2 {
-		log.Fatal(fmt.Sprintf("usage: %s PUZLE_INPUT", os.Args[0]))
+		fmt.Fprintf(os.Stderr, "usage: %s PUZLE_INPUT\n", os.Args[0])
+		os.Exit(1)
 	}
 
 	buf, err := ioutil.ReadFile(os.Args[1])
 	if err != nil {
-		log.Fatal(err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
 	}
 
 	return strings.Split(strings.TrimSpace(string(buf)), "\n")
@@ -27,7 +28,8 @@ func LoadXInts(base int) []int {
 	for _, strval := range LoadInput() {
 		value, err := strconv.ParseInt(strval, base, 0)
 		if err != nil {
-			log.Fatal("Invalid input: ", err.Error())
+			fmt.Fprintf(os.Stderr, "Invalid input: %s", err.Error())
+			os.Exit(1)
 		}
 		values = append(values, int(value))
 	}
