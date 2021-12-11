@@ -40,7 +40,7 @@ func (b *board) check(number int, drawnNumbers map[int]bool) (bool, int) {
 	x, y := b.findPosition(number)
 	bingo := true
 
-	for x := 0; y < 5; x += 1 {
+	for x := 0; x < 5; x += 1 {
 		if !drawnNumbers[b.rows[y][x]] {
 			bingo = false
 			break
@@ -80,16 +80,60 @@ func (b *board) String() string {
 }
 
 func part1() int {
+	_, boardLookup, numbers := setupGame()
+
+	drawnNumbers := map[int]bool{}
+	for _, num := range numbers {
+		drawnNumbers[num] = true
+		for _, board := range boardLookup[num] {
+			if hasBingo, sumUnmarked := board.check(num, drawnNumbers); hasBingo {
+				return sumUnmarked * num
+			}
+		}
+
+	}
+
+	panic("No one won")
+	return 0
+}
+
+func part2() int {
+	boards, boardLookup, numbers := setupGame()
+
+	drawnNumbers := map[int]bool{}
+	for _, num := range numbers {
+		drawnNumbers[num] = true
+		for _, board := range boardLookup[num] {
+			if boards[board] {
+				if hasBingo, sumUnmarked := board.check(num, drawnNumbers); hasBingo {
+					if len(boards) == 1 {
+						return sumUnmarked * num
+					} else {
+						delete(boards, board)
+					}
+				}
+			}
+		}
+
+	}
+
+	panic("No one won")
+	return 0
+}
+
+func setupGame() (map[*board]bool, map[int][]*board, []int) {
 	input := util.LoadInput()
 
-	boards := []*board{}
+	boards := map[*board]bool{}
 	boardLookup := map[int][]*board{}
 
+	boardNo := 0
 	current := &board{}
 	for _, numbers := range input[2:] {
 		if numbers == "" {
-			boards = append(boards, current)
+			boards[current] = true
 			current = &board{}
+			boardNo += 1
 			continue
 		}
 
@@ -105,27 +149,19 @@ func part1() int {
 		current.rows = append(current.rows, row)
 	}
 
-	drawnNumbers := map[int]bool{}
+	numbers := []int{}
 	for _, strValue := range strings.Split(input[0], ",") {
 		num, err := strconv.Atoi(strValue)
 		if err != nil {
 			panic(fmt.Sprintf("Invalid input: %s", strValue))
 		}
-
-		drawnNumbers[num] = true
-		for _, board := range boardLookup[num] {
-			if hasBingo, sumUnmarked := board.check(num, drawnNumbers); hasBingo {
-				return sumUnmarked * num
-			}
-		}
-
+		numbers = append(numbers, num)
 	}
 
-	panic("No one won")
-	return 0
+	return boards, boardLookup, numbers
 }
 
 func main() {
 	fmt.Printf("Part 1: %d\n", part1())
-	//fmt.Printf("Part 2: %d\n", part2())
+	fmt.Printf("Part 2: %d\n", part2())
 }
