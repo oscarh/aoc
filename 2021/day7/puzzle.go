@@ -7,6 +7,14 @@ import (
 	"github.com/oscarh/aoc/util"
 )
 
+func mean(nums []int) int {
+	sum := 0
+	for _, n := range nums {
+		sum +=n
+	}
+	return sum / len(nums)
+}
+
 func median(nums []int) int {
 	tmp := nums
 	sort.Ints(tmp)
@@ -26,10 +34,14 @@ func abs(v int) int {
 	}
 }
 
-func move(positions []int, target int) int {
+func gauss(n int) int {
+	return n * (n + 1) / 2
+}
+
+func move(positions []int, target int, costFunc func(int) int) int {
 	cost := 0
 	for _, pos := range positions {
-		cost += abs(target - pos)
+		cost += costFunc(target - pos)
 	}
 	return cost
 }
@@ -37,10 +49,42 @@ func move(positions []int, target int) int {
 func part1() int {
 	positions := util.LoadCommaSeparatedInts()
 	target := median(positions)
-	return move(positions, target)
+	return move(positions, target, abs)
+}
+
+func part2() int {
+	positions := util.LoadCommaSeparatedInts()
+	target := mean(positions)
+	targetCost := move(positions, target, func (d int) int { return gauss(abs(d))})
+	t := target - 1
+	for {
+		tCost := move(positions, t, func (d int) int { return gauss(abs(d))})
+		if tCost < targetCost {
+			target = t
+			targetCost = tCost
+			t -= 1
+		} else {
+			break
+		}
+
+	}
+	t = target + 1
+	for {
+		tCost := move(positions, t, func (d int) int { return gauss(abs(d))})
+		if tCost < targetCost {
+			target = t
+			targetCost = tCost
+			t += 1
+		} else {
+			break
+		}
+	}
+
+	return targetCost
 }
 
 func main() {
 	fmt.Printf("Part 1: %d\n", part1())
+	fmt.Printf("Part 2: %d\n", part2())
 }
 
