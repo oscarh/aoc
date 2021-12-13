@@ -34,33 +34,40 @@ func parseLine(line string) (point, point) {
 	return start, end
 }
 
+func delta(s, e int) int {
+	if s < e {
+		return 1
+	} else if s > e {
+		return -1
+	} else {
+		return 0
+	}
+}
+
+func deltaPoint(start, end point) (int, int) {
+	return delta(start.x, end.x), delta(start.y, end.y)
+}
+
 func addLine(floor map[point]int, start, end point) int {
 	newOverlapping := 0
-	if start.x == end.x {
-		if start.y > end.y {
-			tmp := end.y
-			end.y = start.y
-			start.y = tmp
+	dx, dy := deltaPoint(start, end)
+
+	x := start.x
+	y := start.y
+	for {
+		floor[point{x,y}] += 1
+		if floor[point{x,y}] == 2 {
+			newOverlapping += 1
 		}
-		for y := start.y; y <= end.y; y+= 1 {
-			floor[point{start.x,y}] += 1
-			if floor[point{start.x,y}] == 2 {
-				newOverlapping += 1
-			}
+
+		if x == end.x && y == end.y {
+			break
 		}
-	} else if start.y == end.y {
-		if start.x > end.x {
-			tmp := end.x
-			end.x = start.x
-			start.x = tmp
-		}
-		for x := start.x; x <= end.x; x+= 1 {
-			floor[point{x,start.y}] += 1
-			if floor[point{x,start.y}] == 2 {
-				newOverlapping += 1
-			}
-		}
+
+		x += dx
+		y += dy
 	}
+
 	return newOverlapping 
 }
 
@@ -69,7 +76,22 @@ func part1() int {
 	seaFloor := map[point]int{}
 	overlapping := 0
 	for _, line := range input {
-		fmt.Println(line)
+		start, end := parseLine(line)
+		if start.x != end.x &&  start.y != end.y {
+			// Don't consider these in part 1
+			continue
+		}
+		overlapping += addLine(seaFloor, start, end)
+	}
+
+	return overlapping
+}
+
+func part2() int {
+	input := util.LoadInput()
+	seaFloor := map[point]int{}
+	overlapping := 0
+	for _, line := range input {
 		start, end := parseLine(line)
 		overlapping += addLine(seaFloor, start, end)
 	}
@@ -79,5 +101,5 @@ func part1() int {
 
 func main() {
 	fmt.Printf("Part 1: %d\n", part1())
-	//fmt.Printf("Part 2: %d\n", part2())
+	fmt.Printf("Part 2: %d\n", part2())
 }
