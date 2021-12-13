@@ -8,6 +8,24 @@ import (
 	"strconv"
 )
 
+func convertToInt(strValues []string, base int) []int {
+	values := []int{}
+	for _, strval := range strValues {
+		value, err := strconv.ParseInt(strval, base, 0)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Invalid input: %s", err.Error())
+			os.Exit(1)
+		}
+		values = append(values, int(value))
+	}
+	return values
+}
+
+func LoadCommaSeparatedInts() []int {
+	input := LoadInput()
+	return convertToInt(strings.Split(input[0], ","), 10)
+}
+
 func LoadInput() []string {
 	if len(os.Args) < 2 {
 		fmt.Fprintf(os.Stderr, "usage: %s PUZLE_INPUT\n", os.Args[0])
@@ -24,17 +42,7 @@ func LoadInput() []string {
 }
 
 func LoadXInts(base int) []int {
-	values := []int{}
-	for _, strval := range LoadInput() {
-		value, err := strconv.ParseInt(strval, base, 0)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Invalid input: %s", err.Error())
-			os.Exit(1)
-		}
-		values = append(values, int(value))
-	}
-
-	return values
+	return convertToInt(LoadInput(), base)
 }
 
 func LoadBinaryInts() []int {
