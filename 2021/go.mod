@@ -1,3 +1,3 @@
 module github.com/oscarh/aoc
 
-go 1.17
+go 1.13
