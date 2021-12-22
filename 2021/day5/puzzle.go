@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"strconv"
+	"strings"
 
 	"github.com/oscarh/aoc/util"
 )
@@ -55,8 +55,8 @@ func addLine(floor map[point]int, start, end point) int {
 	x := start.x
 	y := start.y
 	for {
-		floor[point{x,y}] += 1
-		if floor[point{x,y}] == 2 {
+		floor[point{x, y}] += 1
+		if floor[point{x, y}] == 2 {
 			newOverlapping += 1
 		}
 
@@ -68,7 +68,7 @@ func addLine(floor map[point]int, start, end point) int {
 		y += dy
 	}
 
-	return newOverlapping 
+	return newOverlapping
 }
 
 func part1() int {
@@ -77,7 +77,7 @@ func part1() int {
 	overlapping := 0
 	for _, line := range input {
 		start, end := parseLine(line)
-		if start.x != end.x &&  start.y != end.y {
+		if start.x != end.x && start.y != end.y {
 			// Don't consider these in part 1
 			continue
 		}

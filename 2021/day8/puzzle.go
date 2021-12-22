@@ -9,7 +9,7 @@ import (
 
 type entry struct {
 	patterns []string
-	outputs []string
+	outputs  []string
 }
 
 func loadPatternAndOutputs() []entry {
@@ -18,7 +18,7 @@ func loadPatternAndOutputs() []entry {
 		split := strings.Split(line, " | ")
 		entries = append(entries, entry{
 			patterns: strings.Split(split[0], " "),
-			outputs: strings.Split(split[1], " "),
+			outputs:  strings.Split(split[1], " "),
 		})
 	}
 	return entries

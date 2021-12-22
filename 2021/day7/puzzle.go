@@ -10,7 +10,7 @@ import (
 func mean(nums []int) int {
 	sum := 0
 	for _, n := range nums {
-		sum +=n
+		sum += n
 	}
 	return sum / len(nums)
 }
@@ -19,10 +19,10 @@ func median(nums []int) int {
 	tmp := nums
 	sort.Ints(tmp)
 	middle := len(tmp) / 2
-	if  len(tmp) % 2 == 0 {
+	if len(tmp)%2 == 0 {
 		return tmp[middle]
 	} else {
-		return (tmp[middle - 1] + tmp[middle]) / 2
+		return (tmp[middle-1] + tmp[middle]) / 2
 	}
 }
 
@@ -55,10 +55,10 @@ func part1() int {
 func part2() int {
 	positions := util.LoadCommaSeparatedInts()
 	target := mean(positions)
-	targetCost := move(positions, target, func (d int) int { return gauss(abs(d))})
+	targetCost := move(positions, target, func(d int) int { return gauss(abs(d)) })
 	t := target - 1
 	for {
-		tCost := move(positions, t, func (d int) int { return gauss(abs(d))})
+		tCost := move(positions, t, func(d int) int { return gauss(abs(d)) })
 		if tCost < targetCost {
 			target = t
 			targetCost = tCost
@@ -70,7 +70,7 @@ func part2() int {
 	}
 	t = target + 1
 	for {
-		tCost := move(positions, t, func (d int) int { return gauss(abs(d))})
+		tCost := move(positions, t, func(d int) int { return gauss(abs(d)) })
 		if tCost < targetCost {
 			target = t
 			targetCost = tCost
@@ -87,4 +87,3 @@ func main() {
 	fmt.Printf("Part 1: %d\n", part1())
 	fmt.Printf("Part 2: %d\n", part2())
 }
-

@@ -31,4 +31,3 @@ func part1() int {
 func main() {
 	fmt.Printf("Part 1: %d\n", part1())
 }
-
