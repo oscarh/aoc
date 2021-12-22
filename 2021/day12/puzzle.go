@@ -23,18 +23,6 @@ func small(c string) bool {
 	return c != "start" && c != "end" && strings.ToLower(c) == c
 }
 
-/*
-func smallCaves(connections map[string][]string) []string {
-	caves := []string{}
-	for cave, _ := range connections {
-		if small(cave) {
-			caves = append(caves, cave)
-		}
-	}
-	return caves
-}
-*/
-
 func visit(cave string, path []string, connections map[string][]string, visited []string, smallVisitedTwice bool) int {
 	if cave == "start" {
 		return 0
