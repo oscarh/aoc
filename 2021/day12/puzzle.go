@@ -19,44 +19,60 @@ func loadConnections() map[string][]string {
 	return connections
 }
 
-func small(h string) bool {
-	return h != "start" && h != "end" && strings.ToLower(h) == h
+func small(c string) bool {
+	return c != "start" && c != "end" && strings.ToLower(c) == c
 }
 
-func visit(hoele string, path []string, connections map[string][]string, visited []string) int {
-	if hoele == "start" {
+/*
+func smallCaves(connections map[string][]string) []string {
+	caves := []string{}
+	for cave, _ := range connections {
+		if small(cave) {
+			caves = append(caves, cave)
+		}
+	}
+	return caves
+}
+*/
+
+func visit(cave string, path []string, connections map[string][]string, visited []string, smallVisitedTwice bool) int {
+	if cave == "start" {
 		return 0
 	}
 
-	if small(hoele) {
+	if small(cave) {
 		for _, v := range visited {
-			if hoele == v {
-				return 0
+			if cave == v {
+				if smallVisitedTwice {
+					return 0
+				} else {
+					smallVisitedTwice = true
+				}
 			}
 		}
-		visited = append(visited, hoele)
+		visited = append(visited, cave)
 	}
 
-	path = append(path, hoele)
-	if hoele == "end" {
+	path = append(path, cave)
+	if cave == "end" {
 		fmt.Println(strings.Join(path, ","))
 		return 1
 	}
 
 	paths := 0
-	for _, next := range connections[hoele] {
-		paths += visit(next, path, connections, visited)
+	for _, next := range connections[cave] {
+		paths += visit(next, path, connections, visited, smallVisitedTwice)
 	}
 
 	return paths
 }
 
-func countPaths(connections map[string][]string) int {
+func countPaths(connections map[string][]string, mayVisitSmallTwice bool) int {
 	count := 0
 	visited := []string{}
 	path := []string{"start"}
 	for _, next := range connections["start"] {
-		count += visit(next, path, connections, visited)
+		count += visit(next, path, connections, visited, !mayVisitSmallTwice)
 	}
 	return count
 }
@@ -64,11 +80,13 @@ func countPaths(connections map[string][]string) int {
 func part1() int {
 	conns := loadConnections()
 	fmt.Println(conns)
-	return countPaths(conns)
+	return countPaths(conns, false)
 }
 
 func part2() int {
-	return 0
+	conns := loadConnections()
+	fmt.Println(conns)
+	return countPaths(conns, true)
 }
 
 func main() {
