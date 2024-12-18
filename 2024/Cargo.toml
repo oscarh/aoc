@@ -1,5 +1,5 @@
 [package]
-name = "auc-20204"
+name = "aoc-20204"
 version = "0.1.0"
 edition = "2021"
 publish = false
@@ -7,3 +7,4 @@ publish = false
 [dependencies]
 clap = { version = "4.5", features = [ "derive" ] }
 sorted-vec = "0.8"
+regex = "1.1"
