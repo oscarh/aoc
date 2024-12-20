@@ -35,9 +35,7 @@ fn order(rules: &Rules) -> impl FnMut(&u64, &u64) -> Ordering + use<'_> {
 
 fn ordered(rules: &Rules) -> impl FnMut(&u64, &u64) -> bool + use<'_> {
     let mut order_fn = order(rules);
-    move |a, b| {
-        order_fn(a, b) == Ordering::Less
-    }
+    move |a, b| order_fn(a, b) == Ordering::Less
 }
 
 fn get_middle_value<T>(slice: &[T]) -> &T {
