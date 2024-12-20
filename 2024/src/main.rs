@@ -7,10 +7,13 @@ struct Args {
     command: Command,
 }
 
+mod util;
+
 mod day01;
 mod day02;
 mod day03;
 mod day04;
+mod day05;
 
 #[derive(Debug, Parser)]
 enum Command {
@@ -18,6 +21,7 @@ enum Command {
     Day02,
     Day03,
     Day04,
+    Day05,
 }
 
 fn main() {
@@ -27,5 +31,6 @@ fn main() {
         Command::Day02 => day02::run(),
         Command::Day03 => day03::run(),
         Command::Day04 => day04::run(),
+        Command::Day05 => day05::run(),
     }
 }

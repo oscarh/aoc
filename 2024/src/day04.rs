@@ -1,5 +1,6 @@
 use std::fs::File;
-use std::io::{self, BufRead};
+
+use crate::util;
 
 struct Matrix {
     rows: usize,
@@ -168,15 +169,6 @@ fn part2(lines: impl Iterator<Item = String>) -> u64 {
     count
 }
 
-fn lines_iter<D>(input: D) -> impl Iterator<Item = String>
-where
-    D: std::io::Read + Sized,
-{
-    io::BufReader::new(input)
-        .lines()
-        .map(|lines_res| lines_res.unwrap())
-}
-
 pub fn run() {
     let mut example_data = &b"MMMSXXMASM\n\
            MSAMXMSMSA\n\
@@ -190,11 +182,11 @@ pub fn run() {
            MXMXAXMASX\n"[..];
     println!(
         "Part 1 (example data): {}",
-        part1(lines_iter(&mut example_data))
+        part1(util::lines_iter(&mut example_data))
     );
     println!(
         "Part 1: {}",
-        part1(lines_iter(File::open("input/input_04.txt").unwrap()))
+        part1(util::lines_iter(File::open("input/input_04.txt").unwrap()))
     );
 
     let mut example_data = &b"MMMSXXMASM\n\
@@ -209,10 +201,10 @@ pub fn run() {
            MXMXAXMASX\n"[..];
     println!(
         "Part 2 (example data): {}",
-        part2(lines_iter(&mut example_data))
+        part2(util::lines_iter(&mut example_data))
     );
     println!(
         "Part 2: {}",
-        part2(lines_iter(File::open("input/input_04.txt").unwrap()))
+        part2(util::lines_iter(File::open("input/input_04.txt").unwrap()))
     );
 }
