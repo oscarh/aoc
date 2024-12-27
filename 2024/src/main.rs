@@ -15,6 +15,7 @@ mod day03;
 mod day04;
 mod day05;
 mod day06;
+mod day07;
 
 #[derive(Debug, Parser)]
 enum Command {
@@ -24,6 +25,7 @@ enum Command {
     Day04,
     Day05,
     Day06,
+    Day07,
 }
 
 fn main() {
@@ -35,5 +37,6 @@ fn main() {
         Command::Day04 => day04::run(),
         Command::Day05 => day05::run(),
         Command::Day06 => day06::run(),
+        Command::Day07 => day07::run(),
     }
 }
