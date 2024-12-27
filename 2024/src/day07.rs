@@ -2,41 +2,74 @@ use std::fs::File;
 
 use crate::util;
 
-static OPS: [fn(u64, u64) -> u64; 2] = [|a, b| -> u64 { a + b }, |a, b| -> u64 { a * b }];
+fn add(a: u64, b: u64) -> u64 {
+    a + b
+}
 
-fn validate(result: u64, acc: u64, values: &[u64]) -> bool {
-    if values.is_empty() {
+fn mul(a: u64, b: u64) -> u64 {
+    a * b
+}
+
+fn concat(a: u64, b: u64) -> u64 {
+    format!("{a}{b}").parse::<u64>().unwrap()
+}
+
+type Op = fn(u64, u64) -> u64;
+static OPS: [Op; 3] = [add, mul, concat];
+
+fn calc(ops: &[Op], result: u64, acc: u64, digits: &[u64]) -> bool {
+    if acc > result {
+        return false;
+    }
+
+    if digits.is_empty() {
         return result == acc;
     }
 
-    OPS.iter()
-        .any(|op| validate(result, op(acc, values[0]), &values[1..]))
+    if digits.is_empty() {
+        return result == acc;
+    }
+
+    ops.iter()
+        .any(|op| calc(ops, result, op(acc, digits[0]), &digits[1..]))
 }
 
-fn part1(lines: impl Iterator<Item = String>) -> u64 {
-    let mut sum = 0;
-    for line in lines {
+type Equation = (u64, Vec<u64>);
+
+fn parse(lines: impl Iterator<Item = String>) -> impl Iterator<Item = Equation> {
+    lines.map(|line| {
         let mut parts = line.split(':');
         let result = parts.next().unwrap().parse::<u64>().unwrap();
-        let values: Vec<u64> = parts
+        let digits: Vec<u64> = parts
             .next()
             .unwrap()
             .trim()
             .split(' ')
             .map(|v| v.parse::<u64>().unwrap())
             .collect();
-        if validate(result, values[0], &values[1..]) {
-            sum += result;
-        }
-    }
-    sum
+        (result, digits)
+    })
 }
 
-/*
-fn part2(lines: impl Iterator<Item = String>) -> usize {
-    0
+fn part1(lines: impl Iterator<Item = String>) -> u64 {
+    parse(lines).fold(0, |acc, (result, digits)| {
+        if calc(&OPS[0..=1], result, digits[0], &digits[1..]) {
+            acc + result
+        } else {
+            acc
+        }
+    })
 }
-*/
+
+fn part2(lines: impl Iterator<Item = String>) -> u64 {
+    parse(lines).fold(0, |acc, (result, digits)| {
+        if calc(&OPS, result, digits[0], &digits[1..]) {
+            acc + result
+        } else {
+            acc
+        }
+    })
+}
 
 pub fn run() {
     let example_data = &b"190: 10 19\n\
@@ -56,7 +89,6 @@ pub fn run() {
         "Part 1: {}",
         part1(util::lines_iter(File::open("input/input_07.txt").unwrap()))
     );
-    /*
     println!(
         "Part 2 (example data): {}",
         part2(util::lines_iter(example_data))
@@ -65,5 +97,4 @@ pub fn run() {
         "Part 2: {}", // 2151 is too high
         part2(util::lines_iter(File::open("input/input_07.txt").unwrap()))
     );
-    */
 }
