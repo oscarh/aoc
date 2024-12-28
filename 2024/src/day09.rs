@@ -1,4 +1,5 @@
 use std::fs::File;
+use std::option::Option;
 
 use crate::util;
 
@@ -45,7 +46,7 @@ fn parse(line: &str) -> DiskMap {
     disk
 }
 
-fn find_next_free(map: &DiskMap, mut pos: usize) -> usize {
+fn find_next_free_block(map: &DiskMap, mut pos: usize) -> usize {
     while BlockType::FreeSpace != map[pos] {
         pos += 1;
     }
@@ -53,7 +54,7 @@ fn find_next_free(map: &DiskMap, mut pos: usize) -> usize {
     pos
 }
 
-fn find_file(map: &DiskMap, mut pos: usize) -> usize {
+fn find_file_block(map: &DiskMap, mut pos: usize) -> usize {
     while BlockType::FreeSpace == map[pos] {
         pos -= 1;
     }
@@ -66,8 +67,8 @@ fn compact(map: &mut DiskMap) {
     let mut end_pos = map.len() - 1;
 
     loop {
-        start_pos = find_next_free(map, start_pos);
-        end_pos = find_file(map, end_pos);
+        start_pos = find_next_free_block(map, start_pos);
+        end_pos = find_file_block(map, end_pos);
         if start_pos >= end_pos {
             return;
         }
@@ -82,16 +83,106 @@ fn checksum(map: &DiskMap) -> usize {
     for (pos, block) in map.iter().enumerate() {
         if let BlockType::File(id) = block {
             sum += pos * id;
-        } else {
-            return sum;
         }
     }
 
     sum
 }
 
+fn find_fitting_free_area(map: &DiskMap, size: usize) -> Option<usize> {
+    let mut start_pos = 0;
+    loop {
+        while start_pos < map.len() && map[start_pos] != BlockType::FreeSpace {
+            start_pos += 1;
+        }
+
+        if start_pos >= map.len() {
+            return None;
+        }
+
+        let mut free_size = 1;
+        while start_pos + free_size < map.len()
+            && BlockType::FreeSpace == map[start_pos + free_size]
+        {
+            free_size += 1;
+        }
+
+        if free_size >= size {
+            return Some(start_pos);
+        }
+
+        // move on
+        start_pos += 1;
+    }
+}
+
+fn find_file(map: &DiskMap, mut pos: usize) -> (usize, usize) {
+    let file_id;
+    loop {
+        match map[pos] {
+            BlockType::FreeSpace => {
+                if pos == 0 {
+                    return (0, 0);
+                } else {
+                    pos -= 1
+                }
+            }
+            BlockType::File(id) => {
+                file_id = id;
+                break;
+            }
+        }
+    }
+
+    let mut size = 1;
+    while pos >= size {
+        match map[pos - size] {
+            BlockType::FreeSpace => break,
+            BlockType::File(id) => {
+                if file_id != id {
+                    break;
+                }
+            }
+        }
+        size += 1;
+    }
+    let start_pos = pos + 1 - size;
+
+    (start_pos, size)
+}
+
+fn compact_v2(map: &mut DiskMap) {
+    let mut file_pos = map.len();
+    let mut file_size;
+
+    while file_pos > 0 {
+        (file_pos, file_size) = find_file(map, file_pos - 1);
+        if file_size == 0 {
+            return;
+        }
+        let free_pos = match find_fitting_free_area(map, file_size) {
+            Some(free_pos) => free_pos,
+            None => continue,
+        };
+
+        if free_pos >= file_pos {
+            continue;
+        }
+
+        for i in 0..file_size {
+            map[free_pos + i] = map[file_pos + i];
+            map[file_pos + i] = BlockType::FreeSpace;
+        }
+    }
+}
+
 fn part1(mut map: DiskMap) -> usize {
     compact(&mut map);
+    checksum(&map)
+}
+
+fn part2(mut map: DiskMap) -> usize {
+    compact_v2(&mut map);
     checksum(&map)
 }
 
@@ -104,12 +195,14 @@ pub fn run() {
                 .unwrap()
         ))
     );
-    /*
     println!(
         "Part 2: {}",
-        part2(util::lines_iter(File::open("input/input_09.txt").unwrap()))
+        part2(parse(
+            &util::lines_iter(File::open("input/input_09.txt").unwrap())
+                .next()
+                .unwrap()
+        ))
     );
-    */
 }
 
 #[cfg(test)]
@@ -123,6 +216,14 @@ mod test {
         assert_eq!(
             super::part1(parse(&util::lines_iter(EXAMPLE_DATA).next().unwrap())),
             1928
+        );
+    }
+
+    #[test]
+    fn part2() {
+        assert_eq!(
+            super::part2(parse(&util::lines_iter(EXAMPLE_DATA).next().unwrap())),
+            2858
         );
     }
 }
