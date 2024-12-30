@@ -1,6 +1,8 @@
 use std::fmt::Debug;
 use std::fs::File;
 
+use std::collections::HashMap;
+
 use crate::util;
 
 struct StoneIter<'a> {
@@ -144,12 +146,84 @@ fn part1(mut stones: Stones) -> usize {
     stones.len()
 }
 
+#[derive(Debug)]
+struct CompactStones {
+    stones: HashMap<u64, u64>,
+}
+
+fn transform(stone: u64) -> impl Iterator<Item = u64> {
+    let mut stones = Vec::new();
+
+    if stone == 0 {
+        stones.push(1);
+    } else if even_digits(stone) {
+        let (value_a, value_b) = split_value(stone);
+        stones.push(value_a);
+        stones.push(value_b);
+    } else {
+        stones.push(stone * 2024);
+    }
+
+    stones.into_iter()
+}
+
+impl CompactStones {
+    fn new() -> Self {
+        Self {
+            stones: HashMap::new(),
+        }
+    }
+
+    fn from(stones: Stones) -> Self {
+        let mut cstones = Self::new();
+        stones.iter().for_each(|stone| {
+            cstones.inc(stone.value, 1);
+        });
+        cstones
+    }
+
+    fn blink(&mut self) {
+        let stones: Vec<(u64, u64)> = self.stones.iter().map(|(k, v)| (*k, *v)).collect();
+        self.stones = HashMap::new();
+
+        for (stone, count) in stones {
+            // these stones are removed
+            transform(stone).for_each(|stone| self.inc(stone, count))
+        }
+    }
+
+    fn inc(&mut self, value: u64, count: u64) {
+        *self.stones.entry(value).or_default() += count
+    }
+
+    fn len(&self) -> u64 {
+        self.stones.values().sum()
+    }
+}
+
+fn part2(stones: Stones, times: usize) -> u64 {
+    let mut stones = CompactStones::from(stones);
+
+    for _ in 0..times {
+        stones.blink();
+    }
+
+    stones.len()
+}
+
 pub fn run() {
     println!(
         "Part 1: {}",
         part1(parse(util::lines_iter(
             File::open("input/input_11.txt").unwrap()
         )))
+    );
+    println!(
+        "Part 2: {}",
+        part2(
+            parse(util::lines_iter(File::open("input/input_11.txt").unwrap())),
+            75
+        )
     );
 }
 
@@ -162,5 +236,18 @@ mod test {
     #[test]
     fn part1() {
         assert_eq!(super::part1(parse(util::lines_iter(EXAMPLE_DATA))), 55312);
+    }
+
+    #[test]
+    fn part2_25_blinks() {
+        assert_eq!(
+            super::part2(parse(util::lines_iter(EXAMPLE_DATA)), 25),
+            55312
+        );
+    }
+
+    #[test]
+    fn part2_6_blinks() {
+        assert_eq!(super::part2(parse(util::lines_iter(EXAMPLE_DATA)), 6), 22);
     }
 }
