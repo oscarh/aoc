@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 use std::fs::File;
+use std::mem;
 
 use std::collections::HashMap;
 
@@ -183,11 +184,8 @@ impl CompactStones {
     }
 
     fn blink(&mut self) {
-        let stones: Vec<(u64, u64)> = self.stones.iter().map(|(k, v)| (*k, *v)).collect();
-        self.stones = HashMap::new();
-
+        let stones = mem::take(&mut self.stones);
         for (stone, count) in stones {
-            // these stones are removed
             transform(stone).for_each(|stone| self.inc(stone, count))
         }
     }
